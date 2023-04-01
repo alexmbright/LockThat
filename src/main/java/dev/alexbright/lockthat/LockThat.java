@@ -16,8 +16,8 @@ public final class LockThat extends JavaPlugin {
     public void onEnable() {
         instance = this;
         data = new ConfigFile("chests.yml");
-        if (!data.getConfig().contains("chests")) {
-            data.getConfig().createSection("chests");
+        if (!data.getConfig().contains("locks")) {
+            data.getConfig().createSection("locks");
             data.save();
         }
         Bukkit.getPluginManager().registerEvents(new BlockListener(), this);

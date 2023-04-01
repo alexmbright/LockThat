@@ -10,21 +10,24 @@ import java.util.*;
 
 public class LockHandler {
 
+    public static final HashMap<UUID, String> pendingBreaks = new HashMap<>();
+    public static final List<UUID> pendingLocks = new ArrayList<>();
+
     private static LockThat plugin = LockThat.getInstance();
     private static final ConfigFile data = plugin.getData();
 
-    public static boolean add(Block block, Player player) {
+    public static boolean add(Block block, Player owner) {
         if (contains(block)) return false;
         ConfigurationSection configSection = data.getConfig().getConfigurationSection("locks")
                 .createSection(getLocationString(block.getLocation()));
         configSection.set("type", block.getType().name());
-        configSection.set("owners", Collections.singletonList(player.getUniqueId().toString()));
+        configSection.set("owners", Collections.singletonList(owner.getUniqueId().toString()));
         configSection.set("users", Collections.emptyList());
         data.save();
         return contains(block);
     }
 
-    public static boolean remove(Block block, Player player) {
+    public static boolean remove(Block block) {
         if (!contains(block)) return false;
         ConfigurationSection configSection = data.getConfig().getConfigurationSection("locks");
         configSection.set(getLocationString(block.getLocation()), null);
@@ -43,7 +46,8 @@ public class LockHandler {
     private static List<UUID> getAccessIds(Block block, boolean ownersOnly) {
         List<UUID> ids = new ArrayList<>();
         if (!contains(block)) return ids;
-        ConfigurationSection configSection = data.getConfig().getConfigurationSection(getLocationString(block.getLocation()));
+        ConfigurationSection configSection = data.getConfig().getConfigurationSection("locks")
+                .getConfigurationSection(getLocationString(block.getLocation()));
         List<String> users = configSection.getStringList("owners");
         users.forEach(s -> ids.add(UUID.fromString(s)));
         if (!ownersOnly) {
@@ -61,8 +65,8 @@ public class LockHandler {
         return getAccessIds(block, true).contains(p.getUniqueId());
     }
 
-    private static String getLocationString(Location location) {
-        return location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
+    public static String getLocationString(Location location) {
+        return location.getWorld().getName() + "," + location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
     }
 
 }
