@@ -3,3 +3,8 @@ version: '${project.version}'
 main: dev.alexbright.lockthat.LockThat
 api-version: 1.19
 description: Creates and protects locked containers
+commands:
+  lock:
+    description: Base command for LockThat
+
+

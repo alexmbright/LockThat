@@ -10,7 +10,13 @@ public class LockCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
+        if (args.length == 0) {
 
+        } else if (args.length == 1) {
+
+        } else if (args.length == 2) {
+
+        }
 
         return true;
     }

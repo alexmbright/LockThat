@@ -1,8 +1,9 @@
 package dev.alexbright.lockthat.listeners;
 
-import dev.alexbright.lockthat.handlers.ChestHandler;
-import org.bukkit.Material;
+import dev.alexbright.lockthat.handlers.LockHandler;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.block.data.Openable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,14 +15,16 @@ public class BlockListener implements Listener {
     public void onBlockBreak(BlockBreakEvent e) {
         Player p = e.getPlayer();
         Block b = e.getBlock();
-        if (e.getBlock().getType() == Material.CHEST) {
-            if (ChestHandler.contains(b)) {
-                if (!ChestHandler.isOwner(p, b)) {
+        if (e.getBlock() instanceof Chest) {
+            if (LockHandler.contains(b)) {
+                if (!LockHandler.isOwner(p, b)) {
                     e.setCancelled(true);
                     return;
                 }
 
             }
+        } else if (b.getBlockData() instanceof Openable) {
+
         }
     }
 
