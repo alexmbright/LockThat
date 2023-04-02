@@ -1,11 +1,13 @@
 package dev.alexbright.lockthat.handlers;
 
 import dev.alexbright.lockthat.LockThat;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 
 public class ConfigFile {
 
@@ -21,7 +23,6 @@ public class ConfigFile {
     private void createFile() {
         try {
             if (!file.exists()) {
-                if (!plugin.getDataFolder().exists()) plugin.getDataFolder().mkdirs();
                 file.createNewFile();
             }
         } catch (IOException e) {
@@ -29,6 +30,7 @@ public class ConfigFile {
         }
 
         config = YamlConfiguration.loadConfiguration(file);
+        Bukkit.getLogger().log(Level.INFO, "[" + plugin.getName() + "] " + file.getName() + " initialized");
     }
 
     public FileConfiguration getConfig() {
