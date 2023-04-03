@@ -47,6 +47,11 @@ public class LockHandler {
         return !configSection.contains(getLocationString(block.getLocation()));
     }
 
+    public static boolean removeAll(Player p) {
+        ConfigurationSection configSection = data.getConfig().getConfigurationSection("locks");
+        return true;
+    }
+
     public static boolean contains(Block block) {
         return contains(block.getLocation());
     }
@@ -82,8 +87,7 @@ public class LockHandler {
         if (hasAccess(p, block)) removeUser(block, p);
         ConfigurationSection configSection = getConfigSection(block.getLocation());
         List<String> owners = configSection.getStringList("owners");
-        if (!owners.contains(p.getUniqueId().toString())) return false;
-        owners.add(p.getUniqueId().toString());
+        if (!owners.contains(p.getUniqueId().toString())) owners.add(p.getUniqueId().toString());
         configSection.set("owners", owners);
         data.save();
         return true;
@@ -93,8 +97,7 @@ public class LockHandler {
         if (hasAccess(p, block)) return false;
         ConfigurationSection configSection = getConfigSection(block.getLocation());
         List<String> users = configSection.getStringList("users");
-        if (!users.contains(p.getUniqueId().toString())) return false;
-        users.add(p.getUniqueId().toString());
+        if (!users.contains(p.getUniqueId().toString())) users.add(p.getUniqueId().toString());
         configSection.set("users", users);
         data.save();
         return true;

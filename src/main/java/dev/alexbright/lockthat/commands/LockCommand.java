@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class LockCommand implements CommandExecutor {
 
-    private final HashMap<UUID, LockHandler.RequestType> pendingLocks = LockHandler.pendingLocks;
+    private final HashMap<UUID, RequestType> pendingLocks = LockHandler.pendingLocks;
     private final HashMap<UUID, Player> pendingOwner = LockHandler.pendingOwner;
     private final HashMap<UUID, Player> pendingUser = LockHandler.pendingUser;
     private final List<UUID> pendingChecks = LockHandler.pendingChecks;
@@ -54,7 +54,6 @@ public class LockCommand implements CommandExecutor {
                     p.sendMessage(LockThat.prefix + ChatColor.RED + "To cancel, use " + ChatColor.ITALIC + "/lock cancel");
                     return false;
                 }
-                //p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "Lock request initiated!");
                 p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "Please punch the block you want to lock...");
                 p.sendMessage(LockThat.prefix + ChatColor.GOLD + "To cancel, use " + ChatColor.ITALIC + "/lock cancel");
                 pendingLocks.put(p.getUniqueId(), RequestType.LOCK);
@@ -74,14 +73,19 @@ public class LockCommand implements CommandExecutor {
                 p.sendMessage(LockThat.prefix + ChatColor.GOLD + "To cancel, use " + ChatColor.ITALIC + "/lock cancel");
                 pendingLocks.put(p.getUniqueId(), RequestType.UNLOCK);
             } else if (args[0].equalsIgnoreCase("check")) {
+                if (pendingChecks.contains(p.getUniqueId())) {
+                    pendingChecks.remove(p.getUniqueId());
+                    p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "You are no longer in lock check mode");
+                    return true;
+                }
                 if (LockHandler.hasPending(p)) {
-                    p.sendMessage(LockThat.prefix + ChatColor.RED + "You are either in check mode or have an open request");
+                    p.sendMessage(LockThat.prefix + ChatColor.RED + "You have a pending request...");
                     p.sendMessage(LockThat.prefix + ChatColor.RED + "To cancel, use " + ChatColor.ITALIC + "/lock cancel");
                     return false;
                 }
                 p.sendMessage(LockThat.prefix + ChatColor.YELLOW + ChatColor.BOLD + "You are now in lock check mode");
                 p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "Punch a block to check its lock status and eligibility");
-                p.sendMessage(LockThat.prefix + ChatColor.GOLD + "Use " + ChatColor.ITALIC + "/lock cancel"
+                p.sendMessage(LockThat.prefix + ChatColor.GOLD + "Use " + ChatColor.ITALIC + "/lock check"
                         + ChatColor.RESET + ChatColor.GOLD + " to exit check mode.");
                 pendingChecks.add(p.getUniqueId());
             } else if (args[0].equalsIgnoreCase("cancel")) {
@@ -112,7 +116,7 @@ public class LockCommand implements CommandExecutor {
                     p.sendMessage(LockThat.prefix + ChatColor.RED + "You may only add online players");
                     return false;
                 }
-                p.sendMessage(LockThat.prefix + ChatColor.DARK_RED + ChatColor.BOLD + "WARNING: " + ChatColor.RED + "This action grants full lock control forever");
+                p.sendMessage(LockThat.prefix + ChatColor.DARK_RED + ChatColor.BOLD + "WARNING: " + ChatColor.RED + "This grants full lock control forever!");
                 p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "To confirm request, punch the locked block");
                 p.sendMessage(LockThat.prefix + ChatColor.GOLD + "To cancel, use " + ChatColor.ITALIC + "/lock cancel");
                 pendingOwner.put(p.getUniqueId(), reqPlayer);
@@ -128,7 +132,7 @@ public class LockCommand implements CommandExecutor {
                     p.sendMessage(LockThat.prefix + ChatColor.RED + "You may only add online players");
                     return false;
                 }
-                p.sendMessage(LockThat.prefix + ChatColor.DARK_RED + ChatColor.BOLD + "WARNING: " + ChatColor.RED + "This will grant lock access forever");
+                p.sendMessage(LockThat.prefix + ChatColor.DARK_RED + ChatColor.BOLD + "WARNING: " + ChatColor.RED + "This will grant lock access forever!");
                 p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "To confirm request, punch the locked block");
                 p.sendMessage(LockThat.prefix + ChatColor.GOLD + "To cancel, use " + ChatColor.ITALIC + "/lock cancel");
                 pendingUser.put(p.getUniqueId(), reqPlayer);

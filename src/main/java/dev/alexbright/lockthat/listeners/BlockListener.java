@@ -35,7 +35,7 @@ public class BlockListener implements Listener {
                     p.sendMessage(LockThat.prefix + ChatColor.RED + "Unknown error occurred... please try again");
                     return;
                 }
-                p.sendMessage(LockThat.prefix + ChatColor.GREEN + "Removed lock at " + LockHandler.getLocationString(b.getLocation()));
+                p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GREEN + "Removed lock at " + LockHandler.getLocationString(b.getLocation())));
                 return;
             }
         }

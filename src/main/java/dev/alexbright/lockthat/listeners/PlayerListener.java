@@ -115,7 +115,7 @@ public class PlayerListener implements Listener {
                         return;
                     }
 
-                    if (!LockHandler.addOwner(b, p)) {
+                    if (!LockHandler.addOwner(b, other)) {
                         p.sendMessage(LockThat.prefix + ChatColor.RED + "Unknown error occurred... please try again");
                         return;
                     }
@@ -146,7 +146,7 @@ public class PlayerListener implements Listener {
                         return;
                     }
 
-                    if (!LockHandler.addUser(b, p)) {
+                    if (!LockHandler.addUser(b, other)) {
                         p.sendMessage(LockThat.prefix + ChatColor.RED + "Unknown error occurred... please try again");
                         return;
                     }

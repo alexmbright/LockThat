@@ -2,8 +2,15 @@ name: LockThat
 version: '${project.version}'
 main: dev.alexbright.lockthat.LockThat
 api-version: 1.19
+author: Turbocharger
 description: Creates and protects locked containers
 commands:
   lock:
     description: Base command for LockThat
+    permission: lockthat.base
+permissions:
+  lockthat.base:
+    description: Grants base functionality of LockThat
+    default: true
+
 
