@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="LockThat:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/LockThat_jar</output-path>
-    <root id="archive" name="LockThat.jar">
-      <element id="module-output" name="LockThat" />
-    </root>
-  </artifact>
-</component>
