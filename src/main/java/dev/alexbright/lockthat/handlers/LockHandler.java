@@ -1,13 +1,16 @@
 package dev.alexbright.lockthat.handlers;
 
+import dev.alexbright.lockthat.enums.LockType;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
+import org.bukkit.block.*;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Openable;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.block.data.type.Gate;
+import org.bukkit.block.data.type.TrapDoor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
@@ -21,6 +24,7 @@ public class LockHandler {
     public static final HashMap<UUID, Player> pendingOwner = new HashMap<>();
     public static final HashMap<UUID, Player> pendingUser = new HashMap<>();
     public static final List<UUID> pendingChecks = new ArrayList<>();
+    public static final HashMap<UUID, Date> lastChecked = new HashMap<>();
 
     private static ConfigFile data;
 
@@ -151,6 +155,7 @@ public class LockHandler {
         pendingOwner.remove(id);
         pendingUser.remove(id);
         pendingChecks.remove(id);
+        lastChecked.remove(id);
     }
 
     public static boolean hasPending(Player p) {
@@ -163,27 +168,59 @@ public class LockHandler {
     }
 
     public static Block findRootBlock(Block block) {
-        Block b = block;
+        LockType type = getType(block);
 
-        // check if block is double chest
-        if (b.getState() instanceof Chest && ((Chest) b.getState()).getInventory().getHolder() instanceof DoubleChest) {
-            DoubleChest dc = (DoubleChest) ((Chest) b.getState()).getInventory().getHolder();
+        // check if block is double chest and set block to whichever one is in data file
+        if (type == LockType.DOUBLE_CHEST) {
+            DoubleChest dc = (DoubleChest) ((Chest) block.getState()).getInventory().getHolder();
             Chest left = (Chest) dc.getLeftSide();
             Chest right = (Chest) dc.getRightSide();
             if (LockHandler.contains(right.getBlock()) || LockHandler.contains(left.getBlock()))
-                b = LockHandler.contains(right.getBlock()) ? right.getBlock() : left.getBlock();
+                block = LockHandler.contains(right.getBlock()) ? right.getBlock() : left.getBlock();
 
         // check if block is Door and make sure block is bottom half
-        } else if (b.getBlockData() instanceof Door) {
-            Door d = (Door) b.getBlockData();
-            Location loc = b.getLocation();
+        } else if (type == LockType.DOOR) {
+            Door d = (Door) block.getBlockData();
+            Location loc = block.getLocation();
             if (d.getHalf() == Bisected.Half.TOP) {
                 loc = loc.subtract(0, 1, 0);
             }
-            b = loc.getBlock();
+            block = loc.getBlock();
         }
 
-        return b;
+        // if
+        return block;
+    }
+
+    public static LockType getType(Block block) {
+        LockType type = null;
+        BlockState state = block.getState();
+        BlockData bData = block.getBlockData();
+
+        if (state instanceof Container) {
+            if (state instanceof Chest) {
+                if (((Chest) state).getInventory().getHolder() instanceof DoubleChest) type = LockType.DOUBLE_CHEST;
+                else type = LockType.CHEST;
+            }
+            else if (state instanceof Barrel) type = LockType.BARREL;
+            else if (state instanceof BlastFurnace) type = LockType.BLAST_FURNACE;
+            else if (state instanceof BrewingStand) type = LockType.BREWING_STAND;
+            else if (state instanceof Dispenser) type = LockType.DISPENSER;
+            else if (state instanceof Dropper) type = LockType.DROPPER;
+            else if (state instanceof Furnace && !(state instanceof Smoker)) type = LockType.FURNACE;
+            else if (state instanceof Hopper) type = LockType.HOPPER;
+            else if (state instanceof ShulkerBox) type = LockType.SHULKER_BOX;
+            else if (state instanceof Smoker) type = LockType.SMOKER;
+            else type = LockType.CONTAINER;
+        } else if (bData instanceof Openable) {
+            if (bData instanceof Door) type = LockType.DOOR;
+            else if (bData instanceof TrapDoor) type = LockType.TRAPDOOR;
+            else if (bData instanceof Barrel) type = LockType.BARREL;
+            else if (bData instanceof Gate) type = LockType.GATE;
+            else type = LockType.OPENABLE;
+        }
+
+        return type;
     }
 
 }

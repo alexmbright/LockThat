@@ -3,6 +3,8 @@ package dev.alexbright.lockthat.commands;
 import dev.alexbright.lockthat.LockThat;
 import dev.alexbright.lockthat.handlers.LockHandler;
 import dev.alexbright.lockthat.handlers.LockHandler.RequestType;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -11,6 +13,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -34,18 +37,12 @@ public class LockCommand implements CommandExecutor {
 
         if (args.length == 0) {
             p.sendMessage(LockThat.prefix + ChatColor.YELLOW + ChatColor.BOLD + "Help menu for LockThat:");
-            p.sendMessage(LockThat.prefix + ChatColor.YELLOW + ChatColor.ITALIC + "/lock set" + ChatColor.RESET
-                    + ChatColor.WHITE + " - Set a new lock");
-            p.sendMessage(LockThat.prefix + ChatColor.YELLOW + ChatColor.ITALIC + "/lock addowner <name>" + ChatColor.RESET
-                    + ChatColor.WHITE + " - Add another owner to your lock");
-            p.sendMessage(LockThat.prefix + ChatColor.YELLOW + ChatColor.ITALIC + "/lock adduser <name>" + ChatColor.RESET
-                    + ChatColor.WHITE + " - Grant use to another player");
-            p.sendMessage(LockThat.prefix + ChatColor.YELLOW + ChatColor.ITALIC  + "/lock remove" + ChatColor.RESET
-                    + ChatColor.WHITE + " - Remove a lock");
-            p.sendMessage(LockThat.prefix + ChatColor.YELLOW + ChatColor.ITALIC  + "/lock check" + ChatColor.RESET
-                    + ChatColor.WHITE + " - Check for lock eligibility");
-            p.sendMessage(LockThat.prefix + ChatColor.YELLOW + ChatColor.ITALIC + "/lock cancel" + ChatColor.RESET
-                    + ChatColor.WHITE + " - Cancel pending requests");
+            p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "/lock set" + ChatColor.WHITE + ": set a new lock");
+            p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "/lock addowner <name>" + ChatColor.WHITE + ": add another owner to your lock");
+            p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "/lock adduser <name>" + ChatColor.WHITE + ": grant use to another player");
+            p.sendMessage(LockThat.prefix + ChatColor.YELLOW  + "/lock remove" + ChatColor.WHITE + ": remove a lock");
+            p.sendMessage(LockThat.prefix + ChatColor.YELLOW  + "/lock check" + ChatColor.WHITE + ": check for lock eligibility");
+            p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "/lock cancel" + ChatColor.WHITE + ": cancel pending requests");
             p.sendMessage(LockThat.prefix + ChatColor.GRAY + "Developed with " + ChatColor.LIGHT_PURPLE + "❤ " + ChatColor.GRAY + "by AlexTurbo");
         } else if (args.length == 1) {
             if (args[0].equalsIgnoreCase("set")) {
@@ -75,6 +72,7 @@ public class LockCommand implements CommandExecutor {
             } else if (args[0].equalsIgnoreCase("check")) {
                 if (pendingChecks.contains(p.getUniqueId())) {
                     pendingChecks.remove(p.getUniqueId());
+                    LockHandler.lastChecked.remove(p.getUniqueId());
                     p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "You are no longer in lock check mode");
                     return true;
                 }
@@ -83,10 +81,24 @@ public class LockCommand implements CommandExecutor {
                     p.sendMessage(LockThat.prefix + ChatColor.RED + "To cancel, use " + ChatColor.ITALIC + "/lock cancel");
                     return false;
                 }
-                p.sendMessage(LockThat.prefix + ChatColor.YELLOW + ChatColor.BOLD + "You are now in lock check mode");
+
+                // alert the player of lock check mode in action bar until turned off
+                Bukkit.getScheduler().runTaskTimer(LockThat.getInstance(), task -> {
+                    if (!pendingChecks.contains(p.getUniqueId())) {
+                        task.cancel();
+                        return;
+                    }
+                    if (LockHandler.lastChecked.containsKey(p.getUniqueId())) {
+                        Date date = LockHandler.lastChecked.get(p.getUniqueId());
+                        if (Math.abs(new Date().getTime() - date.getTime()) < 2000) return;
+                    }
+                    LockHandler.lastChecked.remove(p.getUniqueId());
+                    p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.YELLOW + "You are currently in lock check mode"));
+                }, 0L, 10L);
+
                 p.sendMessage(LockThat.prefix + ChatColor.YELLOW + "Punch a block to check its lock status and eligibility");
                 p.sendMessage(LockThat.prefix + ChatColor.GOLD + "Use " + ChatColor.ITALIC + "/lock check"
-                        + ChatColor.RESET + ChatColor.GOLD + " to exit check mode.");
+                        + ChatColor.GOLD + " to exit");
                 pendingChecks.add(p.getUniqueId());
             } else if (args[0].equalsIgnoreCase("cancel")) {
                 if (!LockHandler.hasPending(p)) {
